@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Recruiting Manager Experiment</title>
+<script src="https://unpkg.com/jspsych@7.3.4/dist/jspsych.js"></script>
+<link href="https://unpkg.com/jspsych@7.3.4/dist/jspsych.css" rel="stylesheet" />
+<script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .container { display: flex; gap: 20px; margin-bottom: 30px; }
+    .dropzone {
+      border: 2px dashed #ccc;
+      padding: 10px;
+      min-height: 150px;
+      width: 200px;
+      border-radius: 8px;
+      background-color: #fdfdfd;
+    }
+    .task {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: grab;
+      user-select: none;
+    }
+    .yellow { background-color: #f9e79f; }
+    .blue { background-color: #aed6f1; }
+  </style>
+</head>
+<body></body>
+
+<script>
+  const jsPsych = initJsPsych({
+    on_finish: function() {
+      jsPsych.data.displayData();
+    }
+  });
+
+  const allocationTrial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+      <h2>Drag each task to the candidate you think should complete it</h2>
+      <div class="container">
+        <div id="candidate1" class="dropzone">
+          <h3>Alex</h3>
+          <p>Strong collaborator, loves brainstorming.</p>
+        </div>
+        <div id="candidate2" class="dropzone">
+          <h3>Sam</h3>
+          <p>Detail-oriented, works well independently.</p>
+        </div>
+        <div id="candidate3" class="dropzone">
+          <h3>Taylor</h3>
+          <p>Creative thinker, adaptable.</p>
+        </div>
+      </div>
+
+      <h3>Tasks</h3>
+      <div id="task-pool">
+        <div class="task yellow" draggable="true">Co-create a detailed plan for a product launch</div>
+        <div class="task yellow" draggable="true">Collaborate to develop a group presentation</div>
+        <div class="task yellow" draggable="true">Jointly design a workflow for a new process</div>
+        <div class="task blue" draggable="true">Create a detailed plan independently</div>
+        <div class="task blue" draggable="true">Prepare an individual presentation</div>
+        <div class="task blue" draggable="true">Design a workflow independently</div>
+      </div>
+
+      <script>
+        const tasks = document.querySelectorAll('.task');
+        const zones = document.querySelectorAll('.dropzone');
+
+        tasks.forEach(task => {
+          task.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('task-index', [...tasks].indexOf(task));
+          });
+        });
+
+        zones.forEach(zone => {
+          zone.addEventListener('dragover', e => e.preventDefault());
+          zone.addEventListener('drop', e => {
+            e.preventDefault();
+            const idx = e.dataTransfer.getData('task-index');
+            const draggedTask = document.querySelectorAll('.task')[idx];
+            zone.appendChild(draggedTask);
+          });
+        });
+      <\/script>
+    `,
