@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mentoring Assignment Task</title>
+    <script src="https://unpkg.com/jspsych@7.3.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.2"></script>
+    <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <style>
+        .hris-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .hris-header {
+            background: #2c5aa0;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .task-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #2c5aa0;
+            margin-bottom: 20px;
+        }
+        
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .employee-card {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .employee-card:hover {
+            border-color: #2c5aa0;
+            box-shadow: 0 2px 8px rgba(44, 90, 160, 0.1);
+        }
+        
+        .employee-card.selected {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .employee-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2c5aa0;
+            margin-bottom: 8px;
+        }
+        
+        .employee-details {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .detail-row {
+            margin-bottom: 4px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .workload-high { color: #dc3545; }
+        .workload-medium { color: #ffc107; }
+        .workload-low { color: #28a745; }
+        
+        .assignment-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .mentee-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .selection-area {
+            margin: 15px 0;
+        }
+        
+        .justification-area {
+            margin-top: 15px;
+        }
+        
+        .justification-area textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        .submit-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .submit-btn:hover {
+            background: #218838;
+        }
+        
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        /* Override jsPsych button styling */
+        .jspsych-btn {
+            background: #28a745 !important;
+            color: white !important;
+            border: none !important;
+            padding: 12px 30px !important;
+            border-radius: 4px !important;
+            font-size: 16px !important;
+            cursor: pointer !important;
+            margin-top: 15px !important;
+        }
+        
+        .jspsych-btn:hover {
+            background: #218838 !important;
+        }
+        
+        .jspsych-btn:disabled {
+            background: #6c757d !important;
+            cursor: not-allowed !important;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const jsPsych = initJsPsych({
+            on_finish: function(data) {
+                console.log(data.values());
+                // You can save data here
+                jsPsych.data.displayData();
+            }
+        });
+
+        // Sample employee data - you can modify this
+        const employees = [
+            {
+                id: 1,
+                name: "Sarah Chen",
+                department: "Engineering",
+                experience: "5 years",
+                skills: "JavaScript, Python, Team Leadership",
+                currentWorkload: "Medium",
+                previousMentees: "2",
+                performance: "Exceeds Expectations"
+            },
+            {
+                id: 2,
+                name: "Marcus Johnson",
+                department: "Engineering",
+                experience: "8 years",
+                skills: "Java, System Design, Architecture",
+                currentWorkload: "High",
+                previousMentees: "4",
+                performance: "Outstanding"
+            },
+            {
+                id: 3,
+                name: "Lisa Rodriguez",
+                department: "Product",
+                experience: "3 years",
+                skills: "Product Strategy, Analytics, Communication",
+                currentWorkload: "Low",
+                previousMentees: "1",
+                performance: "Meets Expectations"
+            },
+            {
+                id: 4,
+                name: "David Kim",
+                department: "Engineering",
+                experience: "6 years",
+                skills: "React, Node.js, Mentoring",
+                currentWorkload: "Medium",
+                previousMentees: "3",
+                performance: "Exceeds Expectations"
+            },
+            {
+                id: 5,
+                name: "Jennifer Walsh",
+                department: "Design",
+                experience: "4 years",
+                skills: "UX Design, User Research, Prototyping",
+                currentWorkload: "Low",
+                previousMentees: "1",
+                performance: "Exceeds Expectations"
+            }
+        ];
+
+        // Sample mentee data
+        const mentee = {
+            name: "Alex Thompson",
+            position: "Junior Software Engineer",
+            startDate: "Next Monday",
+            background: "Recent CS graduate, internship at tech startup",
+            goals: "Learn full-stack development, understand team workflows"
+        };
+
+        let selectedEmployeeId = null;
+
+        const mentoring_task = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: function() {
+                let html = '<div class="hris-container">';
+                html += '<div class="hris-header">';
+                html += '<h2>💼 TechCorp HRIS - Mentoring Assignment</h2>';
+                html += '</div>';
+                
+                html += '<div class="task-description">';
+                html += '<strong>Task:</strong> Assign a mentor for the new employee below. Select one employee from your team to serve as their primary mentor for the next 6 months.';
+                html += '</div>';
+                
+                html += '<div class="mentee-info">';
+                html += '<h3>📋 New Employee Details</h3>';
+                html += '<div class="employee-details">';
+                html += '<div class="detail-row"><span class="detail-label">Name:</span> ' + mentee.name + '</div>';
+                html += '<div class="detail-row"><span class="detail-label">Position:</span> ' + mentee.position + '</div>';
+                html += '<div class="detail-row"><span class="detail-label">Start Date:</span> ' + mentee.startDate + '</div>';
+                html += '<div class="detail-row"><span class="detail-label">Background:</span> ' + mentee.background + '</div>';
+                html += '<div class="detail-row"><span class="detail-label">Learning Goals:</span> ' + mentee.goals + '</div>';
+                html += '</div>';
+                html += '</div>';
+                
+                html += '<h3>👥 Available Team Members</h3>';
+                html += '<div class="employee-grid">';
+                
+                employees.forEach(function(emp) {
+                    const workloadClass = emp.currentWorkload.toLowerCase().replace(' ', '-');
+                    html += '<div class="employee-card" data-employee-id="' + emp.id + '">';
+                    html += '<div class="employee-name">' + emp.name + '</div>';
+                    html += '<div class="employee-details">';
+                    html += '<div class="detail-row"><span class="detail-label">Department:</span> ' + emp.department + '</div>';
+                    html += '<div class="detail-row"><span class="detail-label">Experience:</span> ' + emp.experience + '</div>';
+                    html += '<div class="detail-row"><span class="detail-label">Key Skills:</span> ' + emp.skills + '</div>';
+                    html += '<div class="detail-row"><span class="detail-label">Current Workload:</span> <span class="workload-' + workloadClass + '">' + emp.currentWorkload + '</span></div>';
+                    html += '<div class="detail-row"><span class="detail-label">Previous Mentees:</span> ' + emp.previousMentees + '</div>';
+                    html += '<div class="detail-row"><span class="detail-label">Performance:</span> ' + emp.performance + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+                
+                html += '<div class="assignment-section">';
+                html += '<h3>📝 Make Assignment</h3>';
+                html += '<div class="selection-area">';
+                html += '<div class="detail-label">Selected Mentor:</div>';
+                html += '<div id="selected-mentor">None selected</div>';
+                html += '<div id="selection-error" class="error-message" style="display: none;">Please select a mentor before submitting.</div>';
+                html += '</div>';
+                
+                html += '<div class="justification-area">';
+                html += '<label class="detail-label" for="justification">Justification for this assignment:</label>';
+                html += '<textarea id="justification" placeholder="Explain why you chose this person as a mentor..."></textarea>';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+                
+                return html;
+            },
+            choices: ['Submit Assignment'],
+            on_load: function() {
+                // Set up event listeners
+                document.querySelectorAll('.employee-card').forEach(function(card) {
+                    card.addEventListener('click', function() {
+                        // Remove previous selection
+                        document.querySelectorAll('.employee-card').forEach(function(c) {
+                            c.classList.remove('selected');
+                        });
+                        
+                        // Add selection to clicked card
+                        this.classList.add('selected');
+                        selectedEmployeeId = this.dataset.employeeId;
+                        
+                        // Update selected mentor display
+                        const employeeName = this.querySelector('.employee-name').textContent;
+                        document.getElementById('selected-mentor').textContent = employeeName;
+                        document.getElementById('selection-error').style.display = 'none';
+                    });
+                });
+            },
+            button_html: '<button class="jspsych-btn">%choice%</button>',
+            on_finish: function(data) {
+                // Collect selection data
+                const justification = document.getElementById('justification').value;
+                const selectedEmployee = employees.find(function(emp) {
+                    return emp.id == selectedEmployeeId;
+                });
+                
+                // Add data to the trial
+                data.selectedEmployeeId = selectedEmployeeId;
+                data.selectedEmployeeName = selectedEmployee ? selectedEmployee.name : null;
+                data.selectedEmployeeData = selectedEmployee;
+                data.justification = justification;
+                data.menteeAssigned = mentee.name;
+                data.task_type = 'mentoring_assignment';
+                data.timestamp = new Date().toISOString();
+            }
+        };
+
+        // Instructions trial
+        const instructions = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: '<div style="max-width: 800px; margin: 0 auto; font-family: \'Segoe UI\', Tahoma, Geneva, Verdana, sans-serif;">' +
+                     '<h2>Mentoring Assignment Task</h2>' +
+                     '<p>You are a manager at TechCorp and need to assign mentors to new employees.</p>' +
+                     '<p><strong>Your task:</strong></p>' +
+                     '<ul>' +
+                     '<li>Review the new employee\'s profile and needs</li>' +
+                     '<li>Examine the available team members and their qualifications</li>' +
+                     '<li>Select the most appropriate mentor</li>' +
+                     '<li>Provide a brief justification for your choice</li>' +
+                     '</ul>' +
+                     '<p>Consider factors like relevant experience, current workload, mentoring history, and skill match.</p>' +
+                     '<p><em>Press SPACE to continue</em></p>' +
+                     '</div>',
+            choices: [' ']
+        };
+
+        // Create timeline
+        const timeline = [instructions, mentoring_task];
+
+        // Run experiment
+        jsPsych.run(timeline);
+    </script>
+</body>
+</html>

@@ -36,87 +36,330 @@
     }
   });
 
-  const allocationTrial = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-      <h2>Drag each task to the candidate you think should complete it</h2>
-      <div class="container">
-        <div id="candidate1" class="dropzone">
-          <h3>Alex</h3>
-          <p>Strong collaborator, loves brainstorming.</p>
-        </div>
-        <div id="candidate2" class="dropzone">
-          <h3>Sam</h3>
-          <p>Detail-oriented, works well independently.</p>
-        </div>
-        <div id="candidate3" class="dropzone">
-          <h3>Taylor</h3>
-          <p>Creative thinker, adaptable.</p>
-        </div>
+const allocationTrial = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <style>
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        font-family: Arial, sans-serif;
+      }
+      
+      .dropzone {
+        background: 
+          radial-gradient(circle at 25% 25%, #8B4513 2px, transparent 2px),
+          radial-gradient(circle at 75% 25%, #8B4513 2px, transparent 2px),
+          radial-gradient(circle at 25% 75%, #8B4513 2px, transparent 2px),
+          radial-gradient(circle at 75% 75%, #8B4513 2px, transparent 2px),
+          #D2B48C;
+        background-size: 50px 50px;
+        border: 3px solid #8B4513;
+        border-radius: 10px;
+        width: 800px;
+        height: 600px;
+        padding: 20px;
+        position: relative;
+        box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.3);
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
+      
+      .dropzone h3 {
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 0 0 15px 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        text-align: center;
+        font-size: 18px;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 15px;
+      }
+      
+      .dropzone p {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 0 0 30px 0;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        text-align: center;
+        font-size: 14px;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 30px;
+      }
+      
+      .task {
+        width: 120px;
+        height: 120px;
+        margin: 10px;
+        padding: 15px;
+        cursor: grab;
+        border-radius: 3px;
+        box-shadow: 
+          0 4px 8px rgba(0,0,0,0.2),
+          inset 0 1px 0 rgba(255,255,255,0.3);
+        font-size: 12px;
+        font-weight: bold;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        word-wrap: break-word;
+        line-height: 1.2;
+        position: relative;
+        transform: rotate(0deg);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .task:hover {
+        transform: rotate(2deg) scale(1.05);
+        box-shadow: 
+          0 6px 12px rgba(0,0,0,0.3),
+          inset 0 1px 0 rgba(255,255,255,0.3);
+        z-index: 10;
+      }
+      
+      .task:active {
+        cursor: grabbing;
+        transform: rotate(5deg) scale(1.1);
+      }
+      
+      .task.yellow {
+        background: linear-gradient(45deg, #FFE135 0%, #FFED4E 50%, #FFE135 100%);
+        border-left: 3px solid #FFC107;
+      }
+      
+      .task.blue {
+        background: linear-gradient(45deg, #87CEEB 0%, #ADD8E6 50%, #87CEEB 100%);
+        border-left: 3px solid #4682B4;
+      }
+      
+      .task::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 8px;
+        background: rgba(255,255,255,0.7);
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      }
+      
+      #task-pool {
+        background: #f8f8f8;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        min-height: 180px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      #task-pool h3 {
+        margin-top: 0;
+        color: #666;
+        text-align: center;
+      }
+      
+      .dropzone.drag-over {
+        background-color: rgba(139, 69, 19, 0.1);
+        transform: scale(1.02);
+        transition: all 0.2s ease;
+      }
+      
+      /* Random rotation for post-its */
+      .task:nth-child(1) { transform: rotate(-2deg); }
+      .task:nth-child(2) { transform: rotate(1deg); }
+      .task:nth-child(3) { transform: rotate(-1deg); }
+      .task:nth-child(4) { transform: rotate(2deg); }
+      .task:nth-child(5) { transform: rotate(-3deg); }
+      .task:nth-child(6) { transform: rotate(1.5deg); }
+      
+      /* Responsive adjustments */
+      @media (max-width: 900px) {
+        .dropzone {
+          width: 90vw;
+          height: 67.5vw;
+          max-width: 800px;
+          max-height: 600px;
+        }
+        
+        #task-pool {
+          max-width: 90vw;
+        }
+      }
+    </style>
+    
+    <h2>Drag 3 tasks that you think this candidate should complete. </h2>
+    <div class="container">
+      <div id="candidate1" class="dropzone">
+        <h3>Rachel Smith (Remote)</h3>
+        <!-- Post-it notes will be dropped here -->
       </div>
-      <h3>Tasks</h3>
-      <div id="task-pool">
-        <div class="task yellow" draggable="true">Co-create a detailed plan for a product launch</div>
-        <div class="task yellow" draggable="true">Collaborate to develop a group presentation</div>
-        <div class="task yellow" draggable="true">Jointly design a workflow for a new process</div>
-        <div class="task blue" draggable="true">Create a detailed plan independently</div>
-        <div class="task blue" draggable="true">Prepare an individual presentation</div>
-        <div class="task blue" draggable="true">Design a workflow independently</div>
+      <!-- <div id="candidate2" class="dropzone">
+        <h3>Sam</h3>
+        <p>Detail-oriented, works well independently.</p>
       </div>
-    `,
-    choices: ['Continue'],
-    on_load: function() {
-      // Drag and drop logic
-      const tasks = document.querySelectorAll('.task');
-      const zones = document.querySelectorAll('.dropzone');
-      const pool = document.getElementById('task-pool');
+      <div id="candidate3" class="dropzone">
+        <h3>Taylor</h3>
+        <p>Creative thinker, adaptable.</p>
+      </div> -->
+    </div> 
+    
+    <div id="task-pool">
+      <h3>Available Tasks</h3>
+      <div class="task yellow" draggable="true">Mentor junior employees</div>
+      <div class="task yellow" draggable="true">Attend a technical conference</div>
+      <div class="task yellow" draggable="true">Outline future goals for the team</div>
+      <div class="task blue" draggable="true">Participate in a high potential program</div>
+      <div class="task blue" draggable="true">Represent the team in senior leadership meeting</div>
+      <div class="task blue" draggable="true">Gain certification in a specialized tool</div>
+    </div>
+  `,
+  choices: ['Continue'],
+  data: {
+    // Initialize tracking variables
+    assigned_tasks: [],
+    task_assignments: {
+      rachel_tasks: [],
+      unassigned_tasks: [
+        'Mentor junior employees',
+        'Attend a technical conference', 
+        'Outline future goals for the team',
+        'Participate in a high potential program',
+        'Represent the team in senior leadership meeting',
+        'Gain certification in a specialized tool'
+      ]
+    }
+  },
+  on_load: function() {
+    // Get reference to trial data for tracking
+    const trialData = jsPsych.getCurrentTrial().data;
+    
+    // Drag and drop logic
+    const tasks = document.querySelectorAll('.task');
+    const zones = document.querySelectorAll('.dropzone');
+    const pool = document.getElementById('task-pool');
 
-      // Make tasks draggable
-      tasks.forEach(task => {
-        task.addEventListener('dragstart', function(e) {
-          e.dataTransfer.setData('text/plain', [...tasks].indexOf(task));
-        });
+    // Function to update task tracking
+    function updateTaskTracking() {
+      const rachelZone = document.getElementById('candidate1');
+      const taskPool = document.getElementById('task-pool');
+      
+      // Get current assignments
+      const rachelTasks = Array.from(rachelZone.querySelectorAll('.task')).map(t => t.textContent.trim());
+      const unassignedTasks = Array.from(taskPool.querySelectorAll('.task')).map(t => t.textContent.trim());
+      
+      // Update trial data
+      trialData.task_assignments.rachel_tasks = rachelTasks;
+      trialData.task_assignments.unassigned_tasks = unassignedTasks;
+      trialData.assigned_tasks = rachelTasks;
+      
+      console.log('Updated assignments:', trialData.task_assignments);
+    }
+
+    // Make tasks draggable
+    tasks.forEach(task => {
+      task.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('text/plain', [...tasks].indexOf(task));
+        this.style.opacity = '0.5';
       });
-
-      // Make dropzones accept tasks
-      zones.forEach(zone => {
-        zone.addEventListener('dragover', function(e) {
-          e.preventDefault();
-        });
-        zone.addEventListener('drop', function(e) {
-          e.preventDefault();
-          const idx = e.dataTransfer.getData('text/plain');
-          const draggedTask = document.querySelectorAll('.task')[idx];
-          zone.appendChild(draggedTask);
-        });
+      
+      task.addEventListener('dragend', function(e) {
+        this.style.opacity = '1';
       });
+    });
 
-      // Optionally allow dropping back to pool
-      pool.addEventListener('dragover', function(e) {
+    // Make dropzones accept tasks
+    zones.forEach(zone => {
+      zone.addEventListener('dragover', function(e) {
         e.preventDefault();
+        this.classList.add('drag-over');
       });
-      pool.addEventListener('drop', function(e) {
+      
+      zone.addEventListener('dragleave', function(e) {
+        this.classList.remove('drag-over');
+      });
+      
+      zone.addEventListener('drop', function(e) {
         e.preventDefault();
+        this.classList.remove('drag-over');
         const idx = e.dataTransfer.getData('text/plain');
         const draggedTask = document.querySelectorAll('.task')[idx];
-        pool.appendChild(draggedTask);
+        
+        // Add some random positioning within the larger cork board
+        const randomX = Math.random() * 40 - 20;
+        const randomY = Math.random() * 40 - 20;
+        draggedTask.style.transform = `rotate(${randomX/2}deg) translate(${randomY}px, ${randomX}px)`;
+        
+        zone.appendChild(draggedTask);
+        
+        // Update tracking
+        updateTaskTracking();
       });
-    },
-    on_finish: function(data) {
-      // Collect the allocation
-      function getTasks(zoneId) {
-        const zone = document.getElementById(zoneId);
-        if (!zone) return [];
-        return Array.from(zone.querySelectorAll('.task')).map(t => t.textContent);
-      }
-      data.allocations = {
-        Alex: getTasks('candidate1'),
-        Sam: getTasks('candidate2'),
-        Taylor: getTasks('candidate3'),
-        Unassigned: getTasks('task-pool')
-      };
-    }
-  };
+    });
+
+    // Optionally allow dropping back to pool
+    pool.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    pool.addEventListener('drop', function(e) {
+      e.preventDefault();
+      const idx = e.dataTransfer.getData('text/plain');
+      const draggedTask = document.querySelectorAll('.task')[idx];
+      
+      // Reset transform when returning to pool
+      draggedTask.style.transform = '';
+      
+      pool.appendChild(draggedTask);
+      
+      // Update tracking
+      updateTaskTracking();
+    });
+  },
+  on_finish: function(data) {
+    // The task assignments are already tracked in data.task_assignments
+    const rachelTasks = data.task_assignments.rachel_tasks;
+    
+    // Calculate additional metrics
+    data.total_tasks_assigned = rachelTasks.length;
+    data.completed_assignment = rachelTasks.length >= 3;
+    
+    // Save individual task assignments
+    data.rachel_task_1 = rachelTasks[0] || null;
+    data.rachel_task_2 = rachelTasks[1] || null;
+    data.rachel_task_3 = rachelTasks[2] || null;
+    
+    // Categorize tasks by type
+    const yellowTaskList = ['Mentor junior employees', 'Attend a technical conference', 'Outline future goals for the team'];
+    const blueTaskList = ['Participate in a high potential program', 'Represent the team in senior leadership meeting', 'Gain certification in a specialized tool'];
+    
+    data.yellow_tasks_assigned = rachelTasks.filter(task => yellowTaskList.includes(task));
+    data.blue_tasks_assigned = rachelTasks.filter(task => blueTaskList.includes(task));
+    data.yellow_task_count = data.yellow_tasks_assigned.length;
+    data.blue_task_count = data.blue_tasks_assigned.length;
+    
+    // Clean up - remove the large stimulus from saved data to keep it cleaner
+    delete data.stimulus;
+    
+    console.log('Final task allocation data:', {
+      rachel_tasks: data.task_assignments.rachel_tasks,
+      yellow_count: data.yellow_task_count,
+      blue_count: data.blue_task_count,
+      total_assigned: data.total_tasks_assigned
+    });
+  }
+};
 
   jsPsych.run([allocationTrial]);
 </script>
