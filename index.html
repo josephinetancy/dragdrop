@@ -2,11 +2,14 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Recruiting Manager Experiment</title>
+  <title>Employee Attributes</title>
   <script src="https://unpkg.com/jspsych@8.2.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.0.3"></script>
   <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
   <style>
     body { font-family: Arial, sans-serif; }
@@ -60,6 +63,44 @@ var text = {
 
 };
 
+const consent = {
+  type: jsPsychInstructions,
+  pages: [
+    `<p style='font-size: 18px; max-width: 800px; margin: 0 auto;text-align: center;'>
+    <p>TITLE: Employee Attributes</p>
+
+<p>DESCRIPTION: You are invited to participate in research investigating employee attributes. You will be asked to read a description of an employee and to answer various questions about the employee. </p>
+
+
+<p>TIME INVOLVEMENT: In total, your participation will take approximately 2 minutes. </p>
+
+<p>RISKS AND BENEFITS: Risks and discomfort associated with this study are not anticipated beyond those involved in normal, daily computer use. There are no foreseeable psychological risks and benefits beyond those involved in normal, daily life, such as when reading the news. We cannot and do not guarantee or promise that you will receive any personal benefits from this study. </p>
+
+
+<p>PAYMENT: You will receive $.30 as payment for your participation. </p>
+
+
+<p>CONFIDENTIALITY: All records will be stored completely confidentially. No one will access your data except the research team. Any identifying information collected will not be associated with your responses. </p>
+
+
+<p>PARTICIPANT’S RIGHTS: If you have read this form and have decided to participate in this project, please understand your participation is entirely voluntary. You have the right to withdraw your consent or discontinue participation at any time without penalty or loss of benefits to which you are otherwise entitled. The alternative is not to participate. You have the right to refuse to answer particular questions. The results of this research study may be presented at scientific or professional meetings or published in scientific journals. </p>
+
+
+<p>CONTACT INFORMATION: If you have any questions, concerns, or complaints about this research, its procedures, risks, and benefits, contact josetan@stanford.edu. If you are not satisfied with how this study is being conducted, or if you have any concerns, complaints, or general questions about the research or your rights as a participant, please contact the Stanford Institutional Review Board (IRB) to speak to someone independent of the research team at (650)-723-2480 (for medical studies), 650-723-2480 or email at IRB2-Manager@lists.stanford.edu (for non-medical studies), or toll free at 1-866-680-2906. You can also write to the Stanford IRB, Stanford University, 1705 El Camino Real, Palo Alto, CA 94306. </p>
+
+
+<p>YOU MUST BE 18 OR OLDER TO PARTICIPATE. You recognize that you are 18 or older by consenting to participate.</p>
+
+
+<p>Click "Continue" to consent to participate in this study.</p>
+`,
+  ],
+  show_clickable_nav: true,
+  allow_keys: false,
+  allow_backward: true
+};
+
+
 const welcomeInstructions = {
   type: jsPsychInstructions,
   pages: [
@@ -98,6 +139,176 @@ const welcomeInstructions = {
   allow_backward: true
 };
 
+const employmentStatusQuestion = {
+  type: jsPsychSurveyMultiChoice,
+  questions: [
+    {
+      prompt: "What is your employment status?",
+      name: "employment_status",
+      options: [
+        "Employed full-time",
+        "Employed part-time", 
+        "Due to start a new job within the next month",
+        "Unemployed (and job seeking)",
+        "Not in paid work (e.g., homemaker, retired, disabled)",
+        "Other"
+      ],
+      required: true
+    }
+  ],
+  on_finish: function(data) {
+    // Check if participant selected full-time or part-time employment
+    const validResponses = ["Employed full-time", "Employed part-time"];
+    data.passes_employment_check = validResponses.includes(data.response.employment_status);
+  }
+};
+
+
+
+const supervisorQuestion = {
+  type: jsPsychSurveyMultiChoice,
+  questions: [
+    {
+      prompt: "At work, do you have any supervisory responsibilities? In other words, do you have the authority to give instructions to subordinates?",
+      name: "supervisor_status", // Changed from "employment_status" to avoid confusion
+      options: [
+        "Yes",
+        "No",
+        "I would rather not say"
+      ],
+      required: true
+    }
+  ],
+  on_finish: function(data) {
+    // Check if participant selected "Yes"
+    data.passes_supervisor_check = data.response.supervisor_status === "Yes";
+  }
+};
+
+const ineligibleMessage = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
+      <h2 style='color: #d32f2f; margin-bottom: 30px;'>Ineligible for Survey</h2>
+      <p style='font-size: 18px; line-height: 1.6; margin-bottom: 30px;'>
+        We apologize for the inconvenience. Due to your status on Prolific Academic, you are ineligible for the survey.
+      </p>
+      <p style='font-size: 16px; line-height: 1.6;'>
+        Please return the survey to avoid having your work rejected.
+      </p>
+    </div>
+  `,
+  choices: ['End Study'],
+  on_finish: function() {
+    // End the experiment
+  //  jsPsych.endExperiment('Thank you. The study has ended.');
+  }
+};
+
+const employmentScreening = {
+  timeline: [employmentStatusQuestion, supervisorQuestion, ineligibleMessage],
+  conditional_function: function() {
+    // Show ineligible message only if they failed the employment check
+    const lastTrial = jsPsych.data.get().last(1).values()[0];
+    return !lastTrial.passes_employment_check;
+  }
+};
+
+const attentionCheck = {
+  type: jsPsychSurveyMultiChoice,
+  questions: [
+    {
+      prompt: `
+ <style>
+          .required { display: none !important; }
+          .required::after { display: none !important; }
+        </style>
+        <div style='font-size: 18px; line-height: 1.6; margin-bottom: 20px;'>
+          <p>If you are reading these instructions carefully, please do not select the correct answer. Instead, please select the last option.</p>
+          <p>3+7+9=</p>
+        </div>
+      `,
+      name: "attention_check",
+      options: ["19", "20", "21"],
+      required: true
+    }
+  ],
+  on_finish: function(data) {
+    // Check if participant selected "21" (the last option)
+    data.passes_attention_check = data.response.attention_check === "21";
+  }
+};
+
+const attentionFailMessage = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style='text-align: left; font-family: Arial, sans-serif; padding: 50px; max-width: 700px; margin: 0 auto; line-height: 1.6;'>
+      <h2 style='color: #d32f2f; margin-bottom: 30px; text-align: center;'>Attention Check Failed</h2>
+      
+      <p style='font-size: 16px; margin-bottom: 20px;'>
+        We apologize for the inconvenience. The attention check was as follows:
+      </p>
+      
+      <div style='background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;'>
+        <p style='margin-bottom: 10px;'><strong>If you are reading these instructions carefully, please do not select the correct answer. Instead, please select the last option.</strong></p>
+        <p style='margin-bottom: 10px;'>3+7+9=</p>
+        <p>Response options were as follows: 19 / 20 / 21</p>
+      </div>
+      
+      <p style='font-size: 16px; margin-bottom: 20px;'>
+        Although "19" is the mathematically correct answer, the correct answer for this attention check is "21."
+      </p>
+      
+      <p style='font-size: 16px; margin-bottom: 20px;'>
+        You did not pass the attention check. Please return your survey to avoid having your work rejected.
+      </p>
+    </div>
+  `,
+  choices: ['End Study'],
+  on_finish: function() {  }
+};
+
+const attentionCheck2 = {
+  type: jsPsychSurveyText,
+  questions: [
+    {
+      prompt: `
+        <div style='font-size: 18px; line-height: 1.6; margin-bottom: 20px;'>
+          <p>To let us know that you are not a robot, please type the letters of the word (not the numbers) you see in the following image into the response box below. </p> <p>Note that the response box is case sensitive. Please do not leave any spaces before or after the word.</p>
+          <div style='text-align: center; margin: 20px 0;'>
+            <img src="printer-image.jpg" alt="Captcha Image" style='border: 1px solid #ccc; padding: 10px;'/>
+          </div>
+        </div>
+      `,
+      name: "captcha_response",
+      required: true,
+      rows: 1,
+      columns: 20
+    }
+  ],
+  on_finish: function(data) {
+    // Check if participant typed exactly "printer"
+    data.passes_attention_check2 = data.response.captcha_response === "Printer";
+  }
+};
+
+const attentionFail2Message = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style='text-align: center; font-family: Arial, sans-serif; padding: 50px; max-width: 600px; margin: 0 auto;'>
+      <h2 style='color: #d32f2f; margin-bottom: 30px;'>Attention Check Failed</h2>
+      <p style='font-size: 18px; line-height: 1.6; margin-bottom: 30px;'>
+        We apologize for the inconvenience. You did not pass the attention check.
+      </p>
+      <p style='font-size: 16px; line-height: 1.6;'>
+        Please return your survey to avoid having your work rejected.
+      </p>
+    </div>
+  `,
+  choices: ['End Study'],
+  on_finish: function() {
+  }
+};
 
 const nextInstructions = {
   type: jsPsychInstructions,
@@ -561,13 +772,190 @@ const taskAllocationTimeline = {
   timeline: [taskAllocationLoop],
 };
 
+
+
+
+demographics = (function() {
+
+
+const taskComplete = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
+    Thank you. Please click Submit to submit the survey. 
+  `,
+  choices: ['Submit'],
+  on_finish: function() {
+  }
+};
+
+        const gender = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p>What is your gender?</p>',
+            choices: ['Male', 'Female', 'Non-binary', 'Other'],
+            on_finish: (data) => {
+                data.gender = data.response;
+            }
+        };
+
+        const age = {
+            type: jsPsychSurveyText,
+            questions: [{prompt: "Age:", name: "age"}],
+            on_finish: (data) => {
+                data.age = data.response;
+            },
+        }; 
+
+        const ethnicity = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p>What is your race?</p>',
+            choices: ['Native American or Alaska Native', 'Asian or Asian American','Black or African American', 'Hispanic or Latino', 'Middle Eastern', 'Native Hawaiian or Other Pacific Islander', 'White or Caucasian', 'Multiracial', 'Other'],
+            on_finish: (data) => {
+                data.ethnicity = data.response;
+            }
+        };
+
+        const choice = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p>Do you have a choice to work remotely or in-person?</p>',
+            choices: ['Yes', 'No'],
+            on_finish: (data) => {
+                data.ethnicity = data.response;
+            }
+        };
+
+        const remotePercent = {
+  type: jsPsychSurveyHtmlForm,
+  html: `
+    <div style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; max-width: 600px;'>
+      <p>What percentage of your current job is done remotely?</p>
+      <div style='margin: 30px 0;'>
+        <input type="range" id="remote_percent" name="remote_percent" min="0" max="100" value="50" 
+               style='width: 100%; height: 20px;' 
+               oninput="document.getElementById('percentValue').innerHTML = this.value + '%'">
+        <div style='display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px;'>
+          <span>0%</span>
+          <span id="percentValue">50%</span>
+          <span>100%</span>
+        </div>
+      </div>
+    </div>
+  `,
+  on_finish: function(data) {
+    data.remotePercent = parseInt(data.response.remotePercent);
+  }
+};
+
+        const pid = {
+            type: jsPsychSurveyText,
+            questions: [{prompt: "Please enter your Prolific ID in the space below to receive payment.", rows: 1, columns: 50, name: "pid"}],
+            on_finish: (data) => {
+                data.pid = data.response;
+            },
+        }; 
+
+        const demos = {
+            timeline: [gender, age, ethnicity, remotePercent, choice, pid, taskComplete]
+        };
+
+        return demos;
+
+    }());
+
+
+
 const timeline = [
-  // ... other trials
-  welcomeInstructions,
-  sheldonMeasure,
-  nextInstructions,
-  taskAllocationLoop,
-  // ... next trials after successful task allocation
+  consent,
+  employmentStatusQuestion,
+  {
+    timeline: [ineligibleMessage],
+    conditional_function: function() {
+      const lastTrial = jsPsych.data.get().last(1).values()[0];
+      return !lastTrial.passes_employment_check;
+    }
+  },
+  // Supervisor question
+  {
+    timeline: [
+      supervisorQuestion,
+      {
+        timeline: [ineligibleMessage],
+        conditional_function: function() {
+          const lastTrial = jsPsych.data.get().last(1).values()[0];
+          return !lastTrial.passes_supervisor_check;
+        }
+      }
+    ],
+    conditional_function: function() {
+      const employmentTrial = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).last(1).values()[0];
+      return employmentTrial.passes_employment_check;
+    }
+  },
+  // First attention check
+  {
+    timeline: [
+      attentionCheck,
+      {
+        timeline: [attentionFailMessage],
+        conditional_function: function() {
+          const lastTrial = jsPsych.data.get().last(1).values()[0];
+          return !lastTrial.passes_attention_check;
+        }
+      }
+    ],
+    conditional_function: function() {
+      const allTrials = jsPsych.data.get().values();
+      const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
+      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
+      
+      return employmentTrial.passes_employment_check && supervisorTrial.passes_supervisor_check;
+    }
+  },
+  // Second attention check
+  {
+    timeline: [
+      attentionCheck2,
+      {
+        timeline: [attentionFail2Message],
+        conditional_function: function() {
+          const lastTrial = jsPsych.data.get().last(1).values()[0];
+          return !lastTrial.passes_attention_check2;
+        }
+      }
+    ],
+    conditional_function: function() {
+      const allTrials = jsPsych.data.get().values();
+      const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
+      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
+      const attentionTrial = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check'));
+      
+      return employmentTrial.passes_employment_check && 
+             supervisorTrial.passes_supervisor_check && 
+             attentionTrial.passes_attention_check;
+    }
+  },
+  // Main experiment (only if passed all four screenings)
+  {
+    timeline: [
+      welcomeInstructions,
+      sheldonMeasure,
+      taskAllocationLoop,
+      demographics,
+      // ... rest of your experiment
+    ],
+    conditional_function: function() {
+      const allTrials = jsPsych.data.get().values();
+      const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
+      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
+      const attentionTrial = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check'));
+      const attentionTrial2 = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check2'));
+      
+      return employmentTrial.passes_employment_check && 
+             supervisorTrial.passes_supervisor_check && 
+             attentionTrial.passes_attention_check &&
+             attentionTrial2.passes_attention_check2;
+    }
+  }
 ];
 
 jsPsych.run(timeline);
