@@ -190,6 +190,7 @@ const employmentStatusQuestion = {
     // Check if participant selected full-time or part-time employment
     const validResponses = ["Employed full-time", "Employed part-time"];
     data.passes_employment_check = validResponses.includes(data.response.employment_status);
+    jsPsych.data.addProperties({randomAssignment});
   }
 };
 
@@ -834,7 +835,7 @@ const taskComplete = {
 
         const age = {
             type: jsPsychSurveyText,
-            questions: [{prompt: "Age:", name: "age"}],
+            stimulus:'What is your age?',
             on_finish: (data) => {
                 data.age = data.response;
             },
@@ -876,7 +877,7 @@ const taskComplete = {
     </div>
   `,
   on_finish: function(data) {
-    data.remotePercent = parseInt(data.response.remotePercent);
+    data.remotePercent = parseInt(data.response.remote_percent);
   }
 };
 
