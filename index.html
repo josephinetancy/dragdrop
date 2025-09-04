@@ -122,7 +122,7 @@ const consent = {
 <p>YOU MUST BE 18 OR OLDER TO PARTICIPATE. You recognize that you are 18 or older by consenting to participate.</p>
 
 
-<p>Click "Continue" to consent to participate in this study.</p>
+<p>Click "Next" to consent to participate in this study.</p>
 `,
   ],
   show_clickable_nav: true,
@@ -322,7 +322,8 @@ const attentionCheck2 = {
   ],
   on_finish: function(data) {
     // Check if participant typed exactly "printer"
-    data.passes_attention_check2 = data.response.captcha_response === "Printer";
+    const validResponses = ["printer", "Printer"];
+  data.passes_attention_check2 = validResponses.includes(data.response.captcha_response);
   }
 };
 
@@ -433,7 +434,7 @@ sheldonMeasure = {
         },
     ];
 },
-    randomize_question_order: false,
+    randomize_question_order: true,
     scale_width: 600,
    on_finish: function(data) {
         data.randomAssignment = randomAssignment;
@@ -845,9 +846,20 @@ const taskComplete = {
   type: jsPsychHtmlButtonResponse,
   stimulus: `
     <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
-    Thank you. Please click Submit to submit the survey. 
+    Thank you. Please click "Submit" to submit the survey. 
   `,
   choices: ['Submit'],
+  on_finish: function() {
+  }
+};
+
+const taskAlmostComplete = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
+    Thank you for your participation thus far! Now, please complete the following section.
+  `,
+  choices: ['Next'],
   on_finish: function() {
   }
 };
@@ -924,7 +936,7 @@ const age = {
         }; 
 
         const demos = {
-            timeline: [gender, age, ethnicity, remotePercent, choice, pid, taskComplete]
+            timeline: [taskAlmostComplete, gender, age, ethnicity, remotePercent, choice, pid, taskComplete]
         };
 
         return demos;
@@ -1015,6 +1027,7 @@ const timeline = [
     timeline: [
       welcomeInstructions,
       sheldonMeasure,
+      nextInstructions,
       taskAllocationLoop,
       demographics,
       save_data,
