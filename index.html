@@ -435,8 +435,36 @@ sheldonMeasure = {
 },
     randomize_question_order: false,
     scale_width: 600,
-    on_finish: function(data) {
+   on_finish: function(data) {
         data.randomAssignment = randomAssignment;
+        
+        // Create long format data
+        const longFormatData = [];
+        
+        // Loop through each response and create a row
+        for (const [questionName, response] of Object.entries(data.response)) {
+            // Extract construct and item number
+            const parts = questionName.split('_');
+            const construct = parts[0]; // e.g., "Relatedness", "Autonomy", "Competence"
+            const itemNumber = parts[1]; // e.g., "1", "2", "3"
+            
+            longFormatData.push({
+                subject_id: subject_id,
+                trial_type: 'sheldon_measure',
+                randomAssignment: randomAssignment,
+                construct: construct,
+                item_number: itemNumber,
+                question_name: questionName,
+                response: response,
+                rt: data.rt,
+                time_elapsed: data.time_elapsed
+            });
+        }
+        
+        // Add each row to jsPsych data
+        longFormatData.forEach(row => {
+            jsPsych.data.write(row);
+        });
     }
 };
 
@@ -861,7 +889,7 @@ const age = {
             stimulus: '<p>Do you have a choice to work remotely or in-person?</p>',
             choices: ['Yes', 'No'],
             on_finish: (data) => {
-                data.ethnicity = data.response;
+                data.choice = data.response;
             }
         };
 
