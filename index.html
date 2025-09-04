@@ -833,13 +833,19 @@ const taskComplete = {
             }
         };
 
-        const age = {
-            type: jsPsychSurveyText,
-            stimulus:'What is your age?',
-            on_finish: (data) => {
-                data.age = data.response;
-            },
-        }; 
+const age = {
+    type: jsPsychSurveyText,
+    questions: [
+        {
+            prompt: 'What is your age?',
+            name: 'age',
+            required: true
+        }
+    ],
+    on_finish: (data) => {
+        data.age = data.response.age;
+    },
+};
 
         const ethnicity = {
             type: jsPsychHtmlButtonResponse,
