@@ -3,14 +3,15 @@
 <head>
   <meta charset="utf-8">
   <title>Employee Attributes</title>
-  <script src="https://unpkg.com/jspsych@8.2.2"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.1.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-likert@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.0.3"></script>
-  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
+  <script src="jspsych/jspsych.js"></script>
+ <script src="jspsych/plugin-instructions.js"></script>
+ <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+  <script src="jspsych/plugin-html-button-response.js"></script>
+  <script src="jspsych/plugin-survey-likert.js"></script>
+  <script src="jspsych/plugin-survey-multi-choice.js"></script>
+  <script src="jspsych/plugin-survey-text.js"></script>
+  <script src="jspsych/plugin-survey-html-form.js"></script>
+  <link href="./css/jspsych.css" rel="stylesheet" type="text/css"></link>
   <style>
     body { font-family: Arial, sans-serif; }
     .container { display: flex; gap: 20px; margin-bottom: 30px; }
@@ -35,11 +36,40 @@
 </head>
 <body></body>
 <script>
-  const jsPsych = initJsPsych({
-    on_finish: function() {
-      jsPsych.data.displayData();
-    }
-  });
+
+const jsPsych = initJsPsych({
+    on_finish: (data) => {
+        console.log(data);
+        data.boot = boot;
+        // Only redirect to Prolific if participant was NOT booted out
+        if(!boot) {
+            document.body.innerHTML = 
+                `<div align='center' style="margin: 10%">
+                    <p>Thank you for participating!<p>
+                    <b>You will be automatically re-directed to Prolific in a few moments.</b>
+                </div>`;
+            setTimeout(() => { 
+                location.href = `https://app.prolific.co/submissions/complete?cc=${completionCode}`
+            }, 1000);
+        }
+        // If boot = true, the experiment already ended with a message, so do nothing
+    },
+}); 
+
+let boot = false;
+
+// set and save subject ID
+let subject_id = jsPsych.data.getURLVariable("PROLIFIC_PID");
+if (!subject_id) { subject_id = jsPsych.randomization.randomID(10) };
+jsPsych.data.addProperties({ subject: subject_id });
+
+// define file name
+const filename = `${subject_id}.csv`;
+
+// define completion code for Prolific
+const completionCode = "CX5ABNV3"; // need to change to prolific completion code
+
+
 
 const randomAssignment = Math.floor(Math.random() * 3) + 1; 
 
@@ -200,6 +230,7 @@ const ineligibleMessage = {
   `,
   choices: ['End Study'],
   on_finish: function() {
+    boot = true;
     // End the experiment
   //  jsPsych.endExperiment('Thank you. The study has ended.');
   }
@@ -265,7 +296,9 @@ const attentionFailMessage = {
     </div>
   `,
   choices: ['End Study'],
-  on_finish: function() {  }
+  on_finish: function() {  
+    boot = true;
+  }
 };
 
 const attentionCheck2 = {
@@ -307,6 +340,7 @@ const attentionFail2Message = {
   `,
   choices: ['End Study'],
   on_finish: function() {
+    boot = true;
   }
 };
 
@@ -863,6 +897,13 @@ const taskComplete = {
     }());
 
 
+const save_data = {
+  type: jsPsychPipe,
+  action: "save",
+  experiment_id: "wnfETXR3Oa6K",
+  filename: filename,
+  data_string: ()=>jsPsych.data.get().csv()
+              };
 
 const timeline = [
   consent,
@@ -941,7 +982,7 @@ const timeline = [
       sheldonMeasure,
       taskAllocationLoop,
       demographics,
-      // ... rest of your experiment
+      save_data,
     ],
     conditional_function: function() {
       const allTrials = jsPsych.data.get().values();
