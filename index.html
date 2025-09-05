@@ -417,24 +417,26 @@ sheldonRelatedness = {
     scale_width: 600,
 on_finish: function(data) {
     data.randomAssignment = randomAssignment;
+
+    const questionOrder = ['Relatedness_1', 'Relatedness_2', 'Relatedness_3'];
     
     // Create wide format data - one row with all responses as columns
     const wideFormatData = {
-        subject_id: subject_id,
         trial_type: 'sheldonRelatedness',
         randomAssignment: randomAssignment,
         rt: data.rt,
         time_elapsed: data.time_elapsed
     };
     
-    // Add each response as a separate column
-    for (const [questionName, response] of Object.entries(data.response)) {
-        wideFormatData[questionName] = response;
-    }
+    // Add each response in the specified order
+    questionOrder.forEach(questionName => {
+        if (data.response[questionName] !== undefined) {
+            wideFormatData[questionName] = data.response[questionName];
+        }
+    });
     
     // Write single row to jsPsych data
     jsPsych.data.write(wideFormatData);
-}
 };
 
 
@@ -474,20 +476,22 @@ sheldonAutonomy = {
     scale_width: 600,
 on_finish: function(data) {
     data.randomAssignment = randomAssignment;
+   const questionOrder = ['Autonomy_1', 'Autonomy_2', 'Autonomy_3'];
     
     // Create wide format data - one row with all responses as columns
     const wideFormatData = {
-        subject_id: subject_id,
         trial_type: 'sheldonAutonomy',
         randomAssignment: randomAssignment,
         rt: data.rt,
         time_elapsed: data.time_elapsed
     };
     
-    // Add each response as a separate column
-    for (const [questionName, response] of Object.entries(data.response)) {
-        wideFormatData[questionName] = response;
-    }
+    // Add each response in the specified order
+    questionOrder.forEach(questionName => {
+        if (data.response[questionName] !== undefined) {
+            wideFormatData[questionName] = data.response[questionName];
+        }
+    });
     
     // Write single row to jsPsych data
     jsPsych.data.write(wideFormatData);
@@ -530,20 +534,22 @@ sheldonCompetence = {
     scale_width: 600,
 on_finish: function(data) {
     data.randomAssignment = randomAssignment;
+ const questionOrder = ['Competence_1', 'Competence_2', 'Competence_3'];
     
     // Create wide format data - one row with all responses as columns
     const wideFormatData = {
-        subject_id: subject_id,
         trial_type: 'sheldonCompetence',
         randomAssignment: randomAssignment,
         rt: data.rt,
         time_elapsed: data.time_elapsed
     };
     
-    // Add each response as a separate column
-    for (const [questionName, response] of Object.entries(data.response)) {
-        wideFormatData[questionName] = response;
-    }
+    // Add each response in the specified order
+    questionOrder.forEach(questionName => {
+        if (data.response[questionName] !== undefined) {
+            wideFormatData[questionName] = data.response[questionName];
+        }
+    });
     
     // Write single row to jsPsych data
     jsPsych.data.write(wideFormatData);
@@ -760,7 +766,7 @@ const allocationTrial = {
   },
   choices: ['Continue'],
   data: {
-    rachel_tasks: [],
+    chosen_tasks: [],
     total_tasks_assigned: 0,
     task_validation_error: 1
   },
@@ -774,14 +780,14 @@ const allocationTrial = {
 
     // Function to update the trial data whenever tasks are moved
     function updateTaskCount() {
-      const rachelZone = document.getElementById('candidate1');
-      if (rachelZone) {
-        const rachelTasks = Array.from(rachelZone.querySelectorAll('.task')).map(t => t.textContent.trim());
-        trialData.rachel_tasks = rachelTasks;
-        trialData.total_tasks_assigned = rachelTasks.length;
-        trialData.task_validation_error = rachelTasks.length !== 3 ? 1 : 0;
+      const chosenZone = document.getElementById('candidate1');
+      if (chosenZone) {
+        const chosenTasks = Array.from(chosenZone.querySelectorAll('.task')).map(t => t.textContent.trim());
+        trialData.chosen_tasks = chosenTasks;
+        trialData.total_tasks_assigned = chosenTasks.length;
+        trialData.task_validation_error = chosenTasks.length !== 3 ? 1 : 0;
         
-        console.log('Updated - Tasks:', rachelTasks.length, 'Error:', trialData.task_validation_error);
+        console.log('Updated - Tasks:', chosenTasks.length, 'Error:', trialData.task_validation_error);
       }
     }
 
@@ -878,7 +884,7 @@ on_finish: function(data) {
     };
     
     // Get the tasks that were selected
-    const selectedTasks = data.rachel_tasks || [];
+    const selectedTasks = data.chosen_tasks || [];
     
     // Create wide format data - one row with task codes as columns
     const wideFormatData = {
