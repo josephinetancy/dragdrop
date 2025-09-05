@@ -822,9 +822,9 @@ on_finish: function(data) {
     const selectedTasks = data.chosen_tasks || [];
     
       const wideFormatData = {
-        trial_type: 'combined_allocation_sheldon',
         randomAssignment: randomAssignment,
         rt: data.rt,
+        trialData = "allData";
         time_elapsed: data.time_elapsed,
         total_tasks_assigned: data.total_tasks_assigned
     };
@@ -863,7 +863,6 @@ on_finish: function(data) {
     // Also save the original task list for reference
     data.selected_tasks = selectedTasks;
     data.randomAssignment = randomAssignment;
-    data.trialData = "allData";
     
     delete data.stimulus;
     console.log('=== ON_FINISH COMPLETE ===');
