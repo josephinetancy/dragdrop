@@ -8,6 +8,7 @@
  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
   <script src="jspsych/plugin-html-button-response.js"></script>
   <script src="jspsych/plugin-survey-likert.js"></script>
+  <script src="jspsych/plugin-html-keyboard-response.js"></script>
   <script src="jspsych/plugin-survey-multi-choice.js"></script>
   <script src="jspsych/plugin-survey-text.js"></script>
   <script src="jspsych/plugin-survey-html-form.js"></script>
@@ -151,22 +152,36 @@ const welcomeInstructions = {
     `<div style='position: relative; width: 950px; height: 390px; margin: 0 auto; text-align: center; padding: 40px; line-height: 1.6;'>
       <p style='font-size: 18px; margin-bottom: 20px;'>
         <p>Imagine that you manage several teams within a large organization. </p>
-        <p>Each team includes employees from different functions and roles, with varying work arrangements. </p> <p>Some team members are fully remote, some follow a hybrid schedule, and others work fully in the office. </p>
+        <p>Each team includes employees from different functions and roles, with varying work arrangements. 
+        <p>Some team members are <b><span style='color: blue;'>fully remote</b></span>, some follow a <b><span style='color: blue;'>hybrid schedule</b></span>, and others work <b><span style='color: blue;'>fully in the office. </b></span>
       </p>
       </div>`,
 
       `<div style='position: relative; width: 950px; height: 390px; margin: 0 auto; text-align: center; padding: 40px; line-height: 1.6;'>
       <p style='font-size: 18px; margin-bottom: 20px;'>
-        Imagine that one of your employees, Employee A, works ${text.status1}.
+        Imagine that one of your employees, Employee A, works <b><span style='color: blue;'>${text.status1}.</span></b></p>
+        </p>
+        </div>`,
+
+      `<div style='position: relative; width: 950px; height: 390px; margin: 0 auto; text-align: center; padding: 40px; line-height: 1.6;'>
+      <p style='font-size: 18px; margin-bottom: 20px;'>
+        <p><span style='color: darkgray;'>Imagine that one of your employees, Employee A, works <b>${text.status1}.</span></b></p>
+        <p>That is, this employee works <b><span style='color: blue;'>${text.status2}. </span></b></p> 
       </p>
-      <p style='font-size: 18px;'>
-        That is, this employee works ${text.status2}. </p> <p>Out of the five-day workweek, they work ${text.status3}.</p>
+    </div>`,
+
+
+      `<div style='position: relative; width: 950px; height: 390px; margin: 0 auto; text-align: center; padding: 40px; line-height: 1.6;'>
+      <p style='font-size: 18px; margin-bottom: 20px;'>
+        <p><span style='color: darkgray;'>Imagine that one of your employees, Employee A, works <b>${text.status1}.</b></span></p>
+        <p><span style='color: darkgray;'>That is, this employee works <b>${text.status2}. </span></b></p> 
+        <p>Out of the five-day workweek, they work <b><span style='color: blue;'>${text.status3}.</span></b></p>
       </p>
     </div>`,
   ],
   show_clickable_nav: true,
   allow_keys: false,
-  allow_backward: true
+  allow_backward: false
 };
 
 const employmentStatusQuestion = {
@@ -354,7 +369,7 @@ const nextInstructions = {
         As a manager, your role involves assigning tasks that align with your team members' strengths and interests.
       </p>
       <p style='font-size: 18px;'>
-        On the next page, you'll see a cork board with 6 tasks. </p> <p> Please choose three tasks from the list that you believe are best suited to this employee. </p> <p> Select the tasks that you believe may most effectively enhance their engagement and motivation. </p>
+        On the next page, you'll see a cork board with 6 available tasks. </p> <p> Please choose three tasks from the list that you believe are best suited to this employee. </p> <p> Select the tasks that you believe may most effectively enhance their engagement and motivation. </p>
       </p>
     </div>`
   ],
@@ -366,13 +381,13 @@ const nextInstructions = {
 
 const Scale = ['1<br>Not at all', '2<br>', '3<br>', '4<br>Somewhat', '5<br>', '6<br>', '7<br>Very much']
 
-sheldonMeasure = {
+sheldonRelatedness = {
     type: jsPsychSurveyLikert,
     preamble: () => {
      
     return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
-        <p style='font-size: 16px; margin-bottom: 20px;'>
-        As a reminder, Employee A works ${text.status1}.</p>
+        <p style='font-size: 18px; margin-bottom: 20px;'>
+        As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
         <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
         </div>`;
 },
@@ -395,43 +410,7 @@ sheldonMeasure = {
             name: `Relatedness_3`,
             labels: Scale,
             required: true,
-        },
-        {
-            prompt: `...that their choices are based on their true interests and values`,
-            name: `Autonomy_1`,
-            labels: Scale,
-            required: true,
-        },
-        {
-            prompt: `...free to do things their own way`,
-            name: `Autonomy_2`,
-            labels: Scale,
-            required: true,
-        },
-        {
-            prompt: `...that their choices express their "true self"`,
-            name: `Autonomy_3`,
-            labels: Scale,
-            required: true,
-        },
-        {
-            prompt: `...that they can successfully complete difficult tasks and projects`,
-            name: `Competence_1`,
-            labels: Scale,
-            required: true,
-        },
-        {
-            prompt: `...that they can take on and master hard challenges`,
-            name: `Competence_2`,
-            labels: Scale,
-            required: true,
-        },
-        {
-            prompt: `...very capable in what they do`,
-            name: `Competence_3`,
-            labels: Scale,
-            required: true,
-        },
+        }
     ];
 },
     randomize_question_order: true,
@@ -451,7 +430,7 @@ sheldonMeasure = {
             
             longFormatData.push({
                 subject_id: subject_id,
-                trial_type: 'sheldon_measure',
+                trial_type: 'sheldonRelatedness',
                 randomAssignment: randomAssignment,
                 construct: construct,
                 item_number: itemNumber,
@@ -469,6 +448,149 @@ sheldonMeasure = {
     }
 };
 
+
+sheldonAutonomy = {
+    type: jsPsychSurveyLikert,
+    preamble: () => {
+     
+    return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
+        <p style='font-size: 18px; margin-bottom: 20px;'>
+       As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
+        <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
+        </div>`;
+},
+            questions: () => {
+            return [
+        {
+            prompt: `...that their choices are based on their true interests and values`,
+            name: `Autonomy_1`,
+            labels: Scale,
+            required: true,
+        },
+        {
+            prompt: `...free to do things their own way`,
+            name: `Autonomy_2`,
+            labels: Scale,
+            required: true,
+        },
+        {
+            prompt: `...that their choices express their "true self"`,
+            name: `Autonomy_3`,
+            labels: Scale,
+            required: true,
+        }
+    ];
+},
+    randomize_question_order: true,
+    scale_width: 600,
+   on_finish: function(data) {
+        data.randomAssignment = randomAssignment;
+        
+        // Create long format data
+        const longFormatData = [];
+        
+        // Loop through each response and create a row
+        for (const [questionName, response] of Object.entries(data.response)) {
+            // Extract construct and item number
+            const parts = questionName.split('_');
+            const construct = parts[0]; // e.g., "Relatedness", "Autonomy", "Competence"
+            const itemNumber = parts[1]; // e.g., "1", "2", "3"
+            
+            longFormatData.push({
+                subject_id: subject_id,
+                trial_type: 'sheldonAutonomy',
+                randomAssignment: randomAssignment,
+                construct: construct,
+                item_number: itemNumber,
+                question_name: questionName,
+                response: response,
+                rt: data.rt,
+                time_elapsed: data.time_elapsed
+            });
+        }
+        
+        // Add each row to jsPsych data
+        longFormatData.forEach(row => {
+            jsPsych.data.write(row);
+        });
+    }
+};
+
+sheldonCompetence = {
+    type: jsPsychSurveyLikert,
+    preamble: () => {
+     
+    return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
+        <p style='font-size: 18px; margin-bottom: 20px;'>
+       As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
+        <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
+        </div>`;
+},
+            questions: () => {
+            return [
+        {
+            prompt: `...that they can successfully complete difficult tasks and projects`,
+            name: `Competence_1`,
+            labels: Scale,
+            required: true,
+        },
+        {
+            prompt: `...that they can take on and master hard challenges`,
+            name: `Competence_2`,
+            labels: Scale,
+            required: true,
+        },
+        {
+            prompt: `...very capable in what they do`,
+            name: `Competence_3`,
+            labels: Scale,
+            required: true,
+        }
+    ];
+},
+    randomize_question_order: true,
+    scale_width: 600,
+   on_finish: function(data) {
+        data.randomAssignment = randomAssignment;
+        
+        // Create long format data
+        const longFormatData = [];
+        
+        // Loop through each response and create a row
+        for (const [questionName, response] of Object.entries(data.response)) {
+            // Extract construct and item number
+            const parts = questionName.split('_');
+            const construct = parts[0]; // e.g., "Relatedness", "Autonomy", "Competence"
+            const itemNumber = parts[1]; // e.g., "1", "2", "3"
+            
+            longFormatData.push({
+                subject_id: subject_id,
+                trial_type: 'sheldonCompetence',
+                randomAssignment: randomAssignment,
+                construct: construct,
+                item_number: itemNumber,
+                question_name: questionName,
+                response: response,
+                rt: data.rt,
+                time_elapsed: data.time_elapsed
+            });
+        }
+        
+        // Add each row to jsPsych data
+        longFormatData.forEach(row => {
+            jsPsych.data.write(row);
+        });
+    }
+};
+
+// Create the randomized sheldonMeasure
+const sheldonMeasure = {
+    timeline: jsPsych.randomization.shuffle([
+        sheldonAutonomy,
+        sheldonRelatedness, // You'll need to create this one
+        sheldonCompetence
+    ])
+};
 
 const allocationTrial = {
   type: jsPsychHtmlButtonResponse,
@@ -652,7 +774,7 @@ const allocationTrial = {
       </style>
       
       <h3 style="font-size: 18px; font-weight: normal; margin-bottom: 20px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
-        <b>Drag 3 tasks that you believe are best suited to this employee. </b> Select the tasks that you believe may most effectively enhance their engagement and motivation.
+        <b><p>Drag 3 tasks that you believe are best suited to this employee. </b></p> <p>Select the tasks that you believe may most effectively enhance their engagement and motivation.</p>
       </h3>
       <div class="container">
         <div class="main-area">
@@ -857,7 +979,8 @@ const taskAlmostComplete = {
   type: jsPsychHtmlButtonResponse,
   stimulus: `
     <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
-    Thank you for your participation thus far! Now, please complete the following section.
+    <p>Thank you for your participation thus far! </p> 
+    <p>Now, please complete the following section</p>.
   `,
   choices: ['Next'],
   on_finish: function() {
