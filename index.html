@@ -682,12 +682,13 @@ const allocationTrial = {
       </style>
       
       <h3 style="font-size: 18px; font-weight: normal; margin-bottom: 20px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
-        <b><p>Drag 3 tasks that you believe are best suited to this employee. </b></p> <p>Select the tasks that you believe may most effectively enhance their engagement and motivation.</p>
+      <b>As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
+        <b><p>Drag 3 tasks that you believe may most effectively enhance their engagement and motivation.</p>
       </h3>
       <div class="container">
         <div class="main-area">
           <div id="candidate1" class="dropzone">
-            <h3>Employee A ${text.status4}</h3>
+            <h3>Employee A</h3>
             <!-- Post-it notes will be dropped here -->
           </div>
           
@@ -853,7 +854,8 @@ on_finish: function(data) {
     
     sheldonQuestionOrder.forEach(questionName => {
         if (allSheldonResponses[questionName] !== undefined) {
-            wideFormatData[questionName] = allSheldonResponses[questionName];
+            // Add +1 to the Sheldon response (convert string to number first, then add 1)
+            wideFormatData[questionName] = parseInt(allSheldonResponses[questionName]) + 1;
         }
     });
     
