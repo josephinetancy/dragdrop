@@ -414,7 +414,7 @@ const nextInstructions = {
         As a manager, your role involves assigning tasks that align with your team members' strengths and interests.
       </p>
       <p style='font-size: 18px;'>
-        On the next page, you'll see a cork board with 6 available tasks. </p> <p> Please choose three tasks from the list that you believe are best suited to this employee. </p> <p> Select the tasks that you believe may most effectively enhance their engagement and motivation. </p>
+        On the next page, you'll see a cork board with 6 available tasks. </p> <p> Please choose <b>three tasks</b> from the list that you believe are best suited to this employee. </p> <p> Select the <b>tasks</b> that you believe may <b>most effectively enhance their engagement and motivation.</b> </p>
       </p>
     </div>`
   ],
@@ -433,7 +433,7 @@ sheldonRelatedness = {
     return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
         <p style='font-size: 18px; margin-bottom: 20px;'>
         As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
-        <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
+        <h3 style='font-size: 18px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
         </div>`;
 },
             questions: () => {
@@ -470,7 +470,7 @@ sheldonAutonomy = {
     return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
         <p style='font-size: 18px; margin-bottom: 20px;'>
        As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
-        <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
+        <h3 style='font-size: 18px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
         </div>`;
 },
             questions: () => {
@@ -506,7 +506,7 @@ sheldonCompetence = {
     return `<div style='padding-top: 50px; width: 900px; font-size:16px'> 
         <p style='font-size: 18px; margin-bottom: 20px;'>
        As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
-        <h3 style='font-size: 20px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
+        <h3 style='font-size: 18px; font-weight: bold; margin-bottom: 20px;'>I believe that this employee would value feeling...</h3>
         </div>`;
 },
             questions: () => {
@@ -575,13 +575,6 @@ const allocationTrial = {
           font-family: Arial, sans-serif;
         }
         
-        .main-area {
-          display: flex;
-          gap: 20px;
-          align-items: flex-start;
-          justify-content: center;
-        }
-        
         .dropzone {
           background: 
             radial-gradient(circle at 25% 25%, #8B4513 2px, transparent 2px),
@@ -598,7 +591,7 @@ const allocationTrial = {
           position: relative;
           box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.3);
           box-sizing: border-box;
-          flex-shrink: 0;
+          margin: 0 auto;
         }
         
         .dropzone h3 {
@@ -671,11 +664,11 @@ const allocationTrial = {
           border: 2px dashed #ccc;
           border-radius: 10px;
           padding: 20px;
-          width: 300px;
-          height: 600px;
+          width: 800px;
+          min-height: 200px;
           box-sizing: border-box;
-          overflow-y: auto;
-          flex-shrink: 0;
+          margin: 20px auto 0 auto;
+          text-align: center;
         }
         
         #task-pool h3 {
@@ -705,42 +698,32 @@ const allocationTrial = {
         .task:nth-child(6) { transform: rotate(1.5deg); }
         
         /* Responsive adjustments */
-        @media (max-width: 1200px) {
-          .main-area {
-            flex-direction: column;
-            align-items: center;
+        @media (max-width: 900px) {
+          .dropzone, #task-pool {
+            width: 90vw;
+            max-width: 800px;
           }
           
           .dropzone {
-            width: 90vw;
             height: 67.5vw;
-            max-width: 800px;
             max-height: 600px;
-          }
-          
-          #task-pool {
-            width: 90vw;
-            max-width: 800px;
-            height: 200px;
           }
         }
       </style>
       
-      <h3 style="font-size: 18px; font-weight: normal; margin-bottom: 20px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
-      <b>As a reminder, Employee A works <b><span style='color: blue;'>${text.status1}.</b></span></p>
-        <b><p>Drag 3 tasks that you believe may most effectively enhance their engagement and motivation.</p>
+      <h3 style="font-size: 18px; font-weight: normal; margin-bottom: 18px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <b>As a reminder, Employee A works <span style='color: blue;'>${text.status1}</span>.</b>
+        <p>Please select 3 tasks that you believe may <b>most effectively enhance their engagement and motivation.</b></p>
       </h3>
       <div class="container">
-        <div class="main-area">
-          <div id="candidate1" class="dropzone">
-            <h3>Employee A</h3>
-            <!-- Post-it notes will be dropped here -->
-          </div>
-          
-          <div id="task-pool">
-            <h3>Available Tasks</h3>
-            ${taskHTML}
-          </div>
+        <div id="candidate1" class="dropzone">
+          <h3>Employee A</h3>
+          <!-- Post-it notes will be dropped here -->
+        </div>
+        
+        <div id="task-pool">
+          <h3>Available Tasks</h3>
+          ${taskHTML}
         </div>
       </div> 
     `;
