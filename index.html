@@ -856,10 +856,9 @@ on_finish: function(data) {
     // Get the tasks that were selected
     const selectedTasks = data.chosen_tasks || [];
     
-    // Create wide format data - one row with task codes as columns
-    const wideFormatData = {
+      const wideFormatData = {
         subject_id: subject_id,
-        trial_type: 'task_allocation',
+        trial_type: 'combined_allocation_sheldon',
         randomAssignment: randomAssignment,
         rt: data.rt,
         time_elapsed: data.time_elapsed,
@@ -871,6 +870,28 @@ on_finish: function(data) {
         const isSelected = selectedTasks.includes(taskText) ? 1 : 0;
         wideFormatData[taskCode] = isSelected;
     }
+    
+    // Get all Sheldon measure responses
+    const sheldonData = jsPsych.data.get().filter({trial_type: 'survey-likert'});
+    
+    // Extract all Sheldon responses
+    const allSheldonResponses = {};
+    sheldonData.values().forEach(trial => {
+        Object.assign(allSheldonResponses, trial.response || {});
+    });
+    
+    // Add Sheldon responses in fixed order
+    const sheldonQuestionOrder = [
+        'Autonomy_1', 'Autonomy_2', 'Autonomy_3',
+        'Relatedness_1', 'Relatedness_2', 'Relatedness_3', 
+        'Competence_1', 'Competence_2', 'Competence_3'
+    ];
+    
+    sheldonQuestionOrder.forEach(questionName => {
+        if (allSheldonResponses[questionName] !== undefined) {
+            wideFormatData[questionName] = allSheldonResponses[questionName];
+        }
+    });
     
     // Write single row to jsPsych data
     jsPsych.data.write(wideFormatData);
