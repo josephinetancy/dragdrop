@@ -12,6 +12,7 @@
   <script src="jspsych/plugin-survey-multi-choice.js"></script>
   <script src="jspsych/plugin-survey-text.js"></script>
   <script src="jspsych/plugin-survey-html-form.js"></script>
+  <script src="jspsych/plugin-browser-check.js"></script>
   <link href="./css/jspsych.css" rel="stylesheet" type="text/css"></link>
   <style>
     body { font-family: Arial, sans-serif; }
@@ -93,6 +94,36 @@ var text = {
           '(In Person)'
 
 };
+
+const browserCheck = {
+    type: jsPsychBrowserCheck,
+    inclusion_function: (data) => {
+        return data.mobile === false && data.browser !== 'other';
+    },
+    exclusion_message: () => {
+        return `
+            <div style='text-align: center; font-family: Arial, sans-serif; padding: 50px;'>
+                <h2 style='color: #d32f2f; margin-bottom: 30px;'>Desktop Browser Required</h2>
+                <p style='font-size: 18px; margin-bottom: 20px;'>
+                    This study must be completed on a desktop or laptop computer using a modern browser.
+                </p>
+                <p style='font-size: 16px;'>
+                    Mobile devices, tablets, and some browsers are not supported.
+                    Please try again from a desktop/laptop computer.
+                </p>
+            </div>
+        `;
+    }
+};
+
+// Then add browserCheck as the first item in your timeline
+const timeline = [
+    browserCheck,
+    consent,
+    employmentStatusQuestion,
+    // ... rest of your timeline
+];
+
 
 const consent = {
   type: jsPsychInstructions,
@@ -1041,6 +1072,7 @@ const save_data = {
               };
 
 const timeline = [
+  browserCheck,
   consent,
   employmentStatusQuestion,
   {
