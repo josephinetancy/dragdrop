@@ -496,43 +496,8 @@ const sheldonMeasure = {
         sheldonAutonomy,
         sheldonRelatedness,
         sheldonCompetence
-    ]),
-    on_timeline_finish: function() {
-        // Get all the Sheldon measure data from this timeline
-        const sheldonData = jsPsych.data.get().filter({trial_type: 'survey-likert'}).last(3);
-        
-        // Create one combined row with fixed column order
-        const combinedData = {
-            subject_id: subject_id,
-            trial_type: 'sheldon_combined',
-            randomAssignment: randomAssignment,
-            rt: sheldonData.select('rt').sum(),
-            time_elapsed: sheldonData.last(1).values()[0].time_elapsed
-        };
-        
-        // Add responses in fixed order: Autonomy, Relatedness, Competence
-        const questionOrder = [
-            'Autonomy_1', 'Autonomy_2', 'Autonomy_3',
-            'Relatedness_1', 'Relatedness_2', 'Relatedness_3', 
-            'Competence_1', 'Competence_2', 'Competence_3'
-        ];
-        
-        // Extract responses from all trials
-        const allResponses = {};
-        sheldonData.values().forEach(trial => {
-            Object.assign(allResponses, trial.response || {});
-        });
-        
-        // Add each response in the specified order
-        questionOrder.forEach(questionName => {
-            if (allResponses[questionName] !== undefined) {
-                combinedData[questionName] = allResponses[questionName];
-            }
-        });
-        
-        // Write the combined row
-        jsPsych.data.write(combinedData);
-    }
+    ])
+    // Remove the on_timeline_finish function
 };
 
 const allocationTrial = {
