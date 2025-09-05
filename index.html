@@ -116,14 +116,6 @@ const browserCheck = {
     }
 };
 
-// Then add browserCheck as the first item in your timeline
-const timeline = [
-    browserCheck,
-    consent,
-    employmentStatusQuestion,
-    // ... rest of your timeline
-];
-
 
 const consent = {
   type: jsPsychInstructions,
@@ -737,9 +729,7 @@ const allocationTrial = {
     total_tasks_assigned: 0,
     task_validation_error: 1
   },
-  on_load: function() {
-    console.log('=== ALLOCATION TRIAL LOADED ===');
-    
+  on_load: function() {    
     const trialData = jsPsych.getCurrentTrial().data;
     const tasks = document.querySelectorAll('.task');
     const zones = document.querySelectorAll('.dropzone');
@@ -754,7 +744,6 @@ const allocationTrial = {
         trialData.total_tasks_assigned = chosenTasks.length;
         trialData.task_validation_error = chosenTasks.length !== 3 ? 1 : 0;
         
-        console.log('Updated - Tasks:', chosenTasks.length, 'Error:', trialData.task_validation_error);
       }
     }
 
@@ -829,17 +818,12 @@ const allocationTrial = {
       const button = document.querySelector('button');
       if (button) {
         button.addEventListener('click', function() {
-          console.log('=== BUTTON CLICKED - CAPTURING FINAL STATE ===');
           updateTaskCount();
-          console.log('Final validation error:', trialData.task_validation_error);
-        });
+          });
       }
     }, 100); // Small delay to ensure button exists
   },
-on_finish: function(data) {
-    console.log('=== ON_FINISH CALLED ===');
-    console.log('Final data - Task count:', data.total_tasks_assigned, 'Error:', data.task_validation_error);
-    
+on_finish: function(data) {    
     // Define task mapping
     const taskMapping = {
         'Lead a cross-functional project team': 'task_H1',
@@ -898,7 +882,7 @@ on_finish: function(data) {
     data.randomAssignment = randomAssignment;
     
     delete data.stimulus;
-    console.log('=== ON_FINISH COMPLETE ===');
+
 }
 };
 
@@ -913,38 +897,31 @@ const errorMessage = {
   show_clickable_nav: true,
   allow_keys: false,
   on_load: function() {
-    console.log('=== ERROR MESSAGE SHOWN ===');
   }
 };
 
 const conditionalNode = {
   timeline: [errorMessage],
   conditional_function: () => {
-    console.log('=== CONDITIONAL FUNCTION CALLED ===');
     const lastTrial = jsPsych.data.get().last(1).values()[0];
-    console.log('Last trial data task_validation_error:', lastTrial.task_validation_error);
     
     const fail = lastTrial.task_validation_error > 0;
-    console.log('Conditional check - should show error?', fail);
-    return fail;
+     return fail;
   },
 };
 
 const taskAllocationLoop = {
   timeline: [allocationTrial, conditionalNode],
   loop_function: () => {
-    console.log('=== LOOP FUNCTION CALLED ===');
-    const lastTwo = jsPsych.data.get().last(2).values();
+     const lastTwo = jsPsych.data.get().last(2).values();
     
     // Find the allocation trial
     const allocationTrial = lastTwo.find(trial => trial.hasOwnProperty('task_validation_error'));
     
     if (allocationTrial) {
       const fail = allocationTrial.task_validation_error > 0;
-      console.log('Loop check - task count was:', allocationTrial.total_tasks_assigned, 'should loop back?', fail);
-      return fail;
+       return fail;
     } else {
-      console.log('ERROR: Could not find allocation trial data');
       return false;
     }
   },
