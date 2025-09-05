@@ -415,28 +415,6 @@ sheldonRelatedness = {
 },
     randomize_question_order: true,
     scale_width: 600,
-on_finish: function(data) {
-    data.randomAssignment = randomAssignment;
-
-    const questionOrder = ['Relatedness_1', 'Relatedness_2', 'Relatedness_3'];
-    
-    // Create wide format data - one row with all responses as columns
-    const wideFormatData = {
-        trial_type: 'sheldonRelatedness',
-        randomAssignment: randomAssignment,
-        rt: data.rt,
-        time_elapsed: data.time_elapsed
-    };
-    
-    // Add each response in the specified order
-    questionOrder.forEach(questionName => {
-        if (data.response[questionName] !== undefined) {
-            wideFormatData[questionName] = data.response[questionName];
-        }
-    });
-    
-    // Write single row to jsPsych data
-    jsPsych.data.write(wideFormatData);
 };
 
 
@@ -473,29 +451,7 @@ sheldonAutonomy = {
     ];
 },
     randomize_question_order: true,
-    scale_width: 600,
-on_finish: function(data) {
-    data.randomAssignment = randomAssignment;
-   const questionOrder = ['Autonomy_1', 'Autonomy_2', 'Autonomy_3'];
-    
-    // Create wide format data - one row with all responses as columns
-    const wideFormatData = {
-        trial_type: 'sheldonAutonomy',
-        randomAssignment: randomAssignment,
-        rt: data.rt,
-        time_elapsed: data.time_elapsed
-    };
-    
-    // Add each response in the specified order
-    questionOrder.forEach(questionName => {
-        if (data.response[questionName] !== undefined) {
-            wideFormatData[questionName] = data.response[questionName];
-        }
-    });
-    
-    // Write single row to jsPsych data
-    jsPsych.data.write(wideFormatData);
-}
+    scale_width: 600
 };
 
 sheldonCompetence = {
@@ -531,38 +487,52 @@ sheldonCompetence = {
     ];
 },
     randomize_question_order: true,
-    scale_width: 600,
-on_finish: function(data) {
-    data.randomAssignment = randomAssignment;
- const questionOrder = ['Competence_1', 'Competence_2', 'Competence_3'];
-    
-    // Create wide format data - one row with all responses as columns
-    const wideFormatData = {
-        trial_type: 'sheldonCompetence',
-        randomAssignment: randomAssignment,
-        rt: data.rt,
-        time_elapsed: data.time_elapsed
-    };
-    
-    // Add each response in the specified order
-    questionOrder.forEach(questionName => {
-        if (data.response[questionName] !== undefined) {
-            wideFormatData[questionName] = data.response[questionName];
-        }
-    });
-    
-    // Write single row to jsPsych data
-    jsPsych.data.write(wideFormatData);
-    }
+    scale_width: 600
 }
 
 // Create the randomized sheldonMeasure
 const sheldonMeasure = {
     timeline: jsPsych.randomization.shuffle([
         sheldonAutonomy,
-        sheldonRelatedness, // You'll need to create this one
+        sheldonRelatedness,
         sheldonCompetence
-    ])
+    ]),
+    on_timeline_finish: function() {
+        // Get all the Sheldon measure data from this timeline
+        const sheldonData = jsPsych.data.get().filter({trial_type: 'survey-likert'}).last(3);
+        
+        // Create one combined row with fixed column order
+        const combinedData = {
+            subject_id: subject_id,
+            trial_type: 'sheldon_combined',
+            randomAssignment: randomAssignment,
+            rt: sheldonData.select('rt').sum(),
+            time_elapsed: sheldonData.last(1).values()[0].time_elapsed
+        };
+        
+        // Add responses in fixed order: Autonomy, Relatedness, Competence
+        const questionOrder = [
+            'Autonomy_1', 'Autonomy_2', 'Autonomy_3',
+            'Relatedness_1', 'Relatedness_2', 'Relatedness_3', 
+            'Competence_1', 'Competence_2', 'Competence_3'
+        ];
+        
+        // Extract responses from all trials
+        const allResponses = {};
+        sheldonData.values().forEach(trial => {
+            Object.assign(allResponses, trial.response || {});
+        });
+        
+        // Add each response in the specified order
+        questionOrder.forEach(questionName => {
+            if (allResponses[questionName] !== undefined) {
+                combinedData[questionName] = allResponses[questionName];
+            }
+        });
+        
+        // Write the combined row
+        jsPsych.data.write(combinedData);
+    }
 };
 
 const allocationTrial = {
