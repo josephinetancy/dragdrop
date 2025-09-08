@@ -828,67 +828,74 @@ const allocationTrial = {
       }
     }, 100); // Small delay to ensure button exists
   },
-on_finish: function(data) {    
-    // Define task mapping
-    const taskMapping = {
-        'Lead a cross-functional project team': 'task_H1',
-        'Participate in a high potential leadership program': 'task_H2', 
-        'Represent the team in senior leadership meeting': 'task_H3',
-        'Participate in a training workshop': 'task_L1',
-        'Attend a technical conference': 'task_L2',
-        'Present technical expertise at team lunch': 'task_L3'
-    };
-    
-    // Get the tasks that were selected
-    const selectedTasks = data.chosen_tasks || [];
-    
+  on_finish: function(data) {    
+    // Only save the comprehensive data if this is a successful trial (exactly 3 tasks)
+    if (data.task_validation_error === 0) {
+      // Define task mapping
+      const taskMapping = {
+          'Lead a cross-functional project team': 'task_H1',
+          'Participate in a high potential leadership program': 'task_H2', 
+          'Represent the team in senior leadership meeting': 'task_H3',
+          'Participate in a training workshop': 'task_L1',
+          'Attend a technical conference': 'task_L2',
+          'Present technical expertise at team lunch': 'task_L3'
+      };
+      
+      // Get the tasks that were selected
+      const selectedTasks = data.chosen_tasks || [];
+      
       const wideFormatData = {
-        randomAssignment: randomAssignment,
-        rt: data.rt,
-        trialData: "allData",
-        time_elapsed: data.time_elapsed,
-        total_tasks_assigned: data.total_tasks_assigned
-    };
-    
-    // Add each task as a column with 1/0 values
-    for (const [taskText, taskCode] of Object.entries(taskMapping)) {
-        const isSelected = selectedTasks.includes(taskText) ? 1 : 0;
-        wideFormatData[taskCode] = isSelected;
+          randomAssignment: randomAssignment,
+          rt: data.rt,
+          trialData: "allData",
+          time_elapsed: data.time_elapsed,
+          total_tasks_assigned: data.total_tasks_assigned,
+          trial_attempt: 'successful' // Mark this as the successful attempt
+      };
+      
+      // Add each task as a column with 1/0 values
+      for (const [taskText, taskCode] of Object.entries(taskMapping)) {
+          const isSelected = selectedTasks.includes(taskText) ? 1 : 0;
+          wideFormatData[taskCode] = isSelected;
+      }
+      
+      // Get all Sheldon measure responses
+      const sheldonData = jsPsych.data.get().filter({trial_type: 'survey-likert'});
+      
+      // Extract all Sheldon responses
+      const allSheldonResponses = {};
+      sheldonData.values().forEach(trial => {
+          Object.assign(allSheldonResponses, trial.response || {});
+      });
+      
+      // Add Sheldon responses in fixed order
+      const sheldonQuestionOrder = [
+          'Autonomy_1', 'Autonomy_2', 'Autonomy_3',
+          'Relatedness_1', 'Relatedness_2', 'Relatedness_3', 
+          'Competence_1', 'Competence_2', 'Competence_3'
+      ];
+      
+      sheldonQuestionOrder.forEach(questionName => {
+          if (allSheldonResponses[questionName] !== undefined) {
+              // Add +1 to the Sheldon response (convert string to number first, then add 1)
+              wideFormatData[questionName] = parseInt(allSheldonResponses[questionName]) + 1;
+          }
+      });
+      
+      // Write single row to jsPsych data
+      jsPsych.data.write(wideFormatData);
+      
+      console.log('Comprehensive data saved for successful trial:', wideFormatData);
+    } else {
+      // For failed attempts, just save basic info
+      console.log('Failed attempt - not saving comprehensive data. Tasks assigned:', data.total_tasks_assigned);
     }
     
-    // Get all Sheldon measure responses
-    const sheldonData = jsPsych.data.get().filter({trial_type: 'survey-likert'});
-    
-    // Extract all Sheldon responses
-    const allSheldonResponses = {};
-    sheldonData.values().forEach(trial => {
-        Object.assign(allSheldonResponses, trial.response || {});
-    });
-    
-    // Add Sheldon responses in fixed order
-    const sheldonQuestionOrder = [
-        'Autonomy_1', 'Autonomy_2', 'Autonomy_3',
-        'Relatedness_1', 'Relatedness_2', 'Relatedness_3', 
-        'Competence_1', 'Competence_2', 'Competence_3'
-    ];
-    
-    sheldonQuestionOrder.forEach(questionName => {
-        if (allSheldonResponses[questionName] !== undefined) {
-            // Add +1 to the Sheldon response (convert string to number first, then add 1)
-            wideFormatData[questionName] = parseInt(allSheldonResponses[questionName]) + 1;
-        }
-    });
-    
-    // Write single row to jsPsych data
-    jsPsych.data.write(wideFormatData);
-    
-    // Also save the original task list for reference
-    data.selected_tasks = selectedTasks;
+    // Always save basic trial info
+    data.selected_tasks = data.chosen_tasks;
     data.randomAssignment = randomAssignment;
-    
     delete data.stimulus;
-
-}
+  }
 };
 
 const errorMessage = {
