@@ -253,14 +253,12 @@ const employmentStatusQuestion = {
   }
 };
 
-
-
 const supervisorQuestion = {
   type: jsPsychSurveyMultiChoice,
   questions: [
     {
       prompt: "At work, do you have any supervisory responsibilities? In other words, do you have the authority to give instructions to subordinates?",
-      name: "supervisor_status", // Changed from "employment_status" to avoid confusion
+      name: "supervisor_status",
       options: [
         "Yes",
         "No",
@@ -270,8 +268,8 @@ const supervisorQuestion = {
     }
   ],
   on_finish: function(data) {
-    // Check if participant selected "Yes"
-    data.passes_supervisor_check = data.response.supervisor_status === "Yes";
+    // Just record the response, don't use it for exclusion
+    data.supervisor_response = data.response.supervisor_status;
   }
 };
 
@@ -281,7 +279,7 @@ const ineligibleMessage = {
     <div style='text-align: center; padding: 50px; max-width: 600px; margin: 0 auto;'>
       <h2 style='color: #d32f2f; margin-bottom: 30px;'>Ineligible for Survey</h2>
       <p style='font-size: 18px; line-height: 1.6; margin-bottom: 30px;'>
-        We apologize for the inconvenience. Due to your status on Prolific Academic, you are ineligible for the survey.
+        We apologize for the inconvenience. Due to your employment status, you are ineligible for the survey.
       </p>
       <p style='font-size: 16px; line-height: 1.6;'>
         Please return the survey to avoid having your work rejected.
@@ -297,7 +295,7 @@ const ineligibleMessage = {
 };
 
 const employmentScreening = {
-  timeline: [employmentStatusQuestion, supervisorQuestion, ineligibleMessage],
+  timeline: [employmentStatusQuestion, ineligibleMessage],
   conditional_function: function() {
     // Show ineligible message only if they failed the employment check
     const lastTrial = jsPsych.data.get().last(1).values()[0];
@@ -1194,18 +1192,9 @@ const timeline = [
       return !lastTrial.passes_employment_check;
     }
   },
-  // Supervisor question
+  // Supervisor question (no exclusion)
   {
-    timeline: [
-      supervisorQuestion,
-      {
-        timeline: [ineligibleMessage],
-        conditional_function: function() {
-          const lastTrial = jsPsych.data.get().last(1).values()[0];
-          return !lastTrial.passes_supervisor_check;
-        }
-      }
-    ],
+    timeline: [supervisorQuestion],
     conditional_function: function() {
       const employmentTrial = jsPsych.data.get().filter({trial_type: 'survey-multi-choice'}).last(1).values()[0];
       return employmentTrial.passes_employment_check;
@@ -1226,9 +1215,7 @@ const timeline = [
     conditional_function: function() {
       const allTrials = jsPsych.data.get().values();
       const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
-      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
-      
-      return employmentTrial.passes_employment_check && supervisorTrial.passes_supervisor_check;
+      return employmentTrial && employmentTrial.passes_employment_check;
     }
   },
   // Second attention check
@@ -1246,15 +1233,13 @@ const timeline = [
     conditional_function: function() {
       const allTrials = jsPsych.data.get().values();
       const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
-      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
       const attentionTrial = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check'));
       
-      return employmentTrial.passes_employment_check && 
-             supervisorTrial.passes_supervisor_check && 
-             attentionTrial.passes_attention_check;
+      return employmentTrial && employmentTrial.passes_employment_check && 
+             attentionTrial && attentionTrial.passes_attention_check;
     }
   },
-  // Main experiment (only if passed all four screenings)
+  // Main experiment (only if passed employment and both attention checks)
   {
     timeline: [
       welcomeInstructions,
@@ -1268,14 +1253,12 @@ const timeline = [
     conditional_function: function() {
       const allTrials = jsPsych.data.get().values();
       const employmentTrial = allTrials.find(trial => trial.hasOwnProperty('passes_employment_check'));
-      const supervisorTrial = allTrials.find(trial => trial.hasOwnProperty('passes_supervisor_check'));
       const attentionTrial = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check'));
       const attentionTrial2 = allTrials.find(trial => trial.hasOwnProperty('passes_attention_check2'));
       
-      return employmentTrial.passes_employment_check && 
-             supervisorTrial.passes_supervisor_check && 
-             attentionTrial.passes_attention_check &&
-             attentionTrial2.passes_attention_check2;
+      return employmentTrial && employmentTrial.passes_employment_check && 
+             attentionTrial && attentionTrial.passes_attention_check &&
+             attentionTrial2 && attentionTrial2.passes_attention_check2;
     }
   }
 ];
