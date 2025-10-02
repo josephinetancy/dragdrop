@@ -960,8 +960,7 @@ const manipulation_check = {
         const randomAssignment = data.randomAssignment 
         
         // Check if response matches expected assignment
-        // randomAssignment 1 = index 0, randomAssignment 2 = index 1, randomAssignment 3 = index 2
-        const expectedResponse = randomAssignment - 1;
+        const expectedResponse = randomAssignment;
         
         if (response === expectedResponse) {
             data.manipulation_check = "TRUE";
