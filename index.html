@@ -414,7 +414,7 @@ const nextInstructions = {
         As a manager, your role involves assigning tasks that align with your team members' strengths and interests.
       </p>
       <p style='font-size: 18px;'>
-        On the next page, you'll see a cork board with 6 available tasks. </p> <p> Please choose <b>three tasks</b> from the list that you believe are best suited to this employee. </p> <p> Select the <b>tasks</b> that you believe may <b>most effectively enhance their engagement and motivation.</b> </p>
+        On the next page, you'll see a cork board with 8 available tasks. </p> <p> Please choose <b>4 tasks</b> from the list that you believe are best suited to this employee. </p> <p> Select the <b>tasks</b> that you believe may <b>most effectively enhance their engagement and motivation.</b> </p>
       </p>
     </div>`
   ],
@@ -551,11 +551,13 @@ const allocationTrial = {
     // Define all tasks
     const tasks = [
       'Lead a cross-functional project team',
-      'Participate in a high potential leadership program',
       'Represent the team in senior leadership meeting',
-      'Participate in a training workshop',
-      'Attend a technical conference',
-      'Present technical expertise at team lunch'
+      'Participate in a high potential leadership program',
+      'Mentor junior employees',
+      'Gain certification in a specialized tool',
+      'Perform analyses and summarize findings for a team',
+      'Host office hours for technical issues',
+      'Develop prototypes to test new ideas'
     ];
     
     // Shuffle the tasks array
@@ -713,7 +715,7 @@ const allocationTrial = {
       
       <h3 style="font-size: 18px; font-weight: normal; margin-bottom: 18px; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
         <b>As a reminder, Employee A works <span style='color: blue;'>${text.status1}</span>.</b>
-        <p>Please select 3 tasks that you believe may <b>most effectively enhance their engagement and motivation.</b></p>
+        <p>Please select 4 tasks that you believe may <b>most effectively enhance their engagement and motivation.</b></p>
       </h3>
       <div class="container">
         <div id="candidate1" class="dropzone">
@@ -747,7 +749,7 @@ const allocationTrial = {
         const chosenTasks = Array.from(chosenZone.querySelectorAll('.task')).map(t => t.textContent.trim());
         trialData.chosen_tasks = chosenTasks;
         trialData.total_tasks_assigned = chosenTasks.length;
-        trialData.task_validation_error = chosenTasks.length !== 3 ? 1 : 0;
+        trialData.task_validation_error = chosenTasks.length !== 4 ? 1 : 0;
         
       }
     }
@@ -834,11 +836,13 @@ const allocationTrial = {
       // Define task mapping
       const taskMapping = {
           'Lead a cross-functional project team': 'task_H1',
-          'Participate in a high potential leadership program': 'task_H2', 
-          'Represent the team in senior leadership meeting': 'task_H3',
-          'Participate in a training workshop': 'task_L1',
-          'Attend a technical conference': 'task_L2',
-          'Present technical expertise at team lunch': 'task_L3'
+          'Represent the team in senior leadership meeting': 'task_H2', 
+          'Participate in a high potential leadership program': 'task_H3',
+          'Mentor junior employees': 'task_H4',
+          'Gain certification in a specialized tool': 'task_L1',
+          'Perform analyses and summarize findings for a team': 'task_L2',
+          'Host office hours for technical issues': 'task_L3',
+          'Develop prototypes to test new ideas': 'task_L4'
       };
       
       // Get the tasks that were selected
@@ -903,7 +907,7 @@ const errorMessage = {
   pages: [`<div style='text-align: center; font-family: Arial, sans-serif; padding: 50px;'>
     <h2 style="color: #d32f2f; margin-bottom: 30px;">Please drag exactly 3 tasks.</h2>
     <p style="font-size: 18px; color: #666;">
-      Please go back and make sure you have dragged exactly 3 post-it notes onto the cork board.
+      Please go back and make sure you have dragged exactly 4 post-it notes onto the cork board.
     </p>
   </div>`],
   show_clickable_nav: true,
@@ -944,6 +948,28 @@ const taskAllocationTimeline = {
 };
 
 
+const manipulation_check = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p>The employee in this scenario will work...</p>',
+            choices: ["remotely 100% of the time and in the office 0% of the time", "remotely 50% of the time and in the office 50% of the time", "remotely 0% of the time and in the office 100% of the time"],
+    on_finish: function(data) {
+        // Get the participant's response (0-indexed)
+        const response = data.response.Q0;
+        
+        // Get randomAssignment from somewhere (you'll need to define this)
+        const randomAssignment = data.randomAssignment 
+        
+        // Check if response matches expected assignment
+        // randomAssignment 1 = index 0, randomAssignment 2 = index 1, randomAssignment 3 = index 2
+        const expectedResponse = randomAssignment - 1;
+        
+        if (response === expectedResponse) {
+            data.manipulation_check = "TRUE";
+        } else {
+            data.manipulation_check = "fail";
+        }
+    }
+};
 
 
 demographics = (function() {
@@ -1154,7 +1180,7 @@ const pid = {
 const save_data = {
   type: jsPsychPipe,
   action: "save",
-  experiment_id: "ogYh6Ae9Pluo",
+  experiment_id: "WuGekElvuuA0",
   filename: filename,
   data_string: ()=>jsPsych.data.get().csv()
               };
@@ -1237,6 +1263,7 @@ const timeline = [
       sheldonMeasure,
       nextInstructions,
       taskAllocationLoop,
+      manipulation_check,
       demographics,
       save_data,
     ],
