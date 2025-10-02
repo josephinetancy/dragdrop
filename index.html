@@ -63,7 +63,6 @@ if (isMobileDevice()) {
 
 const jsPsych = initJsPsych({
     on_finish: (data) => {
-        console.log(data);
         data.boot = boot;
         // Only redirect to Prolific if participant was NOT booted out
         if(!boot) {
@@ -954,7 +953,7 @@ const manipulation_check = {
             choices: ["remotely 100% of the time and in the office 0% of the time", "remotely 50% of the time and in the office 50% of the time", "remotely 0% of the time and in the office 100% of the time"],
     on_finish: function(data) {
         // Get the participant's response (0-indexed)
-        const response = data.response.Q0;
+        const response = data.response + 1;
         
         // Get randomAssignment from somewhere (you'll need to define this)
         const randomAssignment = data.randomAssignment 
