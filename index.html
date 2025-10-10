@@ -94,7 +94,7 @@ const completionCode = "C1F3T5QH"; // need to change to prolific completion code
 
 
 
-const randomAssignment = Math.floor(Math.random() * 3) + 1; 
+const randomAssignment = Math.random() < 0.5 ? 1 : 3;
 
 console.log(randomAssignment)
 
@@ -197,7 +197,7 @@ const welcomeInstructions = {
       <p style='font-size: 18px; margin-bottom: 20px;'>
         <p>Imagine that you manage several teams within a large organization. </p>
         <p>Each team includes employees from different functions and roles, with varying work arrangements. 
-        <p>Some team members are <b><span style='color: blue;'>fully remote</b></span>, some follow a <b><span style='color: blue;'>hybrid schedule</b></span>, and others work <b><span style='color: blue;'>fully in the office. </b></span>
+        <p>Some team members are <b><span style='color: blue;'>fully remote</b></span> and others work <b><span style='color: blue;'>fully in the office. </b></span>
       </p>
       </div>`,
 
@@ -547,12 +547,12 @@ const allocationTrial = {
   stimulus: function() {
     // Define all tasks
     const tasks = [
-      'Lead a cross-functional project team',
-      'Represent the team in senior leadership meeting',
-      'Participate in a high potential leadership program',
+      'Participate in a leadership training program',
+      'Guide collaboration among cross-department teams',
       'Mentor junior employees',
-      'Gain certification in a specialized tool',
-      'Perform analyses and summarize findings for a team',
+      'Represent the team in a meeting with senior leaders',
+      'Synthesize analysis from a report for a team',
+      'Attend a technical conference',
       'Host office hours for technical issues',
       'Develop prototypes to test new ideas'
     ];
@@ -832,12 +832,12 @@ const allocationTrial = {
     if (data.task_validation_error === 0) {
       // Define task mapping
       const taskMapping = {
-          'Lead a cross-functional project team': 'task_H1',
-          'Represent the team in senior leadership meeting': 'task_H2', 
-          'Participate in a high potential leadership program': 'task_H3',
-          'Mentor junior employees': 'task_H4',
-          'Gain certification in a specialized tool': 'task_L1',
-          'Perform analyses and summarize findings for a team': 'task_L2',
+          'Participate in a leadership training program': 'task_H1',
+          'Guide collaboration among cross-department teams': 'task_H2', 
+          'Mentor junior employees': 'task_H3',
+          'Represent the team in a meeting with senior leaders': 'task_H4',
+          'Synthesize analysis from a report for a team': 'task_L1',
+          'Attend a technical conference': 'task_L2',
           'Host office hours for technical issues': 'task_L3',
           'Develop prototypes to test new ideas': 'task_L4'
       };
@@ -961,8 +961,11 @@ const manipulation_check = {
         
         if (response === expectedResponse) {
             data.manipulation_check = "TRUE";
+            console.log(data.manipulation_check);
+
         } else {
             data.manipulation_check = "fail";
+            console.log(data.manipulation_check)
         }
     }
 };
@@ -1176,7 +1179,7 @@ const pid = {
 const save_data = {
   type: jsPsychPipe,
   action: "save",
-  experiment_id: "WuGekElvuuA0",
+  experiment_id: "oeOJOd4QLjLU",
   filename: filename,
   data_string: ()=>jsPsych.data.get().csv()
               };
