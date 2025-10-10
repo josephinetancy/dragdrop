@@ -948,7 +948,7 @@ const taskAllocationTimeline = {
 const manipulation_check = {
             type: jsPsychHtmlButtonResponse,
             stimulus: '<p>The employee in this scenario will work...</p>',
-            choices: ["remotely 100% of the time and in the office 0% of the time", "remotely 50% of the time and in the office 50% of the time", "remotely 0% of the time and in the office 100% of the time"],
+            choices: ["remotely 100% of the time and in the office 0% of the time", "remotely 0% of the time and in the office 100% of the time"],
     on_finish: function(data) {
         // Get the participant's response (0-indexed)
         const response = data.response + 1;
@@ -957,16 +957,16 @@ const manipulation_check = {
         const randomAssignment = data.randomAssignment 
         
         // Check if response matches expected assignment
-        const expectedResponse = randomAssignment;
-        
-        if (response === expectedResponse) {
-            data.manipulation_check = "TRUE";
-            console.log(data.manipulation_check);
 
-        } else {
-            data.manipulation_check = "fail";
-            console.log(data.manipulation_check)
-        }
+        const codeMap = [1, 3]; // same order as 'choices' above
+        const responseCode = codeMap[data.response]; // 0->1, 1->3
+        console.log(responseCode)
+        
+const expectedResponse = data.randomAssignment; // should be 1 or 3
+
+data.response_code = responseCode; // store the coded response
+data.manipulation_check = (responseCode === expectedResponse) ? "TRUE" : "fail";
+console.log(data.manipulation_check);
     }
 };
 
